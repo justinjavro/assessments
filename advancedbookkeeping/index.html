@@ -130,7 +130,7 @@ const Qs=[
   {type:'open',cat:'Work Paper Lifecycle & Data Integrity',scen:'You receive a raw GL export from a client and a month-end template. You do not have access to any data other than what is provided. You notice the Total Assets on your reconstructed work paper do not match the raw Trial Balance export by $14,200.',text:'Briefly describe your 3-step process to "tie out" this work paper. How do you use the raw data to find the discrepancy, and what specific check or control do you add to the Excel template to ensure this work paper remains in balance for the final close?'}
 ];
 
-let cur=0,sel=Array(Qs.length).fill(null),openR={},tmr,secs=900,cName='',cEmail='',cDate='';
+let cur=0,sel=Array(Qs.length).fill(null),openR={},tmr,secs=900,cName='',cEmail='',cDate='',startSecs=900;
 
 function start(){
   const n=document.getElementById('cname').value.trim();
@@ -140,7 +140,7 @@ function start(){
   cName=n; cEmail=e;
   const dt=new Date(d);
   cDate=dt.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  show('s-question');tmr=setInterval(tick,1000);render();
+  show('s-question');tmr=setInterval(tick,1000);startSecs=secs;render();
 }
 
 function tick(){
@@ -202,9 +202,32 @@ function finish(){
   const mcQs=Qs.filter(q=>q.type==='mc');
   const correct=mcQs.filter(q=>{const i=Qs.indexOf(q);return sel[i]===q.ans;}).length;
   const pct=correct/mcQs.length;
+
+  // Calculate time taken
+  const elapsed=startSecs-secs;
+  const tm=Math.floor(elapsed/60);
+  const ts=elapsed%60;
+  const timeTaken=`${tm}m ${ts.toString().padStart(2,'0')}s`;
+
+  // Skill level + next steps
+  let skill,steps;
+  if(pct>=.9){
+    skill='Advanced Proficiency';
+    steps=['Advance to technical interview or final-stage evaluation.','Written responses will be reviewed by the hiring manager before your interview.','Expect follow-up within 2–3 business days.'];
+  }else if(pct>=.7){
+    skill='Solid — Minor Gaps';
+    steps=['A follow-up interview may be scheduled to explore specific areas.','Review: adjusting entries, depreciation, and multi-entity accounting.','Expect follow-up within 3–5 business days.'];
+  }else if(pct>=.5){
+    skill='Developing — Training Recommended';
+    steps=['Additional training in GL accounting and adjusting entries is recommended.','Consider re-assessment after targeted coursework.','You may be considered for a structured entry-level track.'];
+  }else{
+    skill='Not Yet Ready';
+    steps=['We recommend completing intermediate accounting coursework before reapplying.','Focus areas: adjusting entries, depreciation, fixed assets, and intercompany transactions.','You are welcome to reapply after completing targeted training.'];
+  }
+
   document.getElementById('rname').textContent=`${cName}  ·  ${cDate}`;
   show('s-results');
-  sendToSheet(correct,pct);
+  sendToSheet(correct,pct,skill,steps,timeTaken);
 }
 
 function show(id){
@@ -212,7 +235,7 @@ function show(id){
   document.getElementById(id).classList.add('active');
 }
 
-function sendToSheet(score,pct){
+function sendToSheet(score,pct,skill,steps,timeTaken){
   const mcSummary=Qs.map((q,i)=>{
     if(q.type!=='mc')return null;
     const chosen=sel[i]!==null?L[sel[i]]:'—';
@@ -231,6 +254,9 @@ function sendToSheet(score,pct){
     assessment:'GL Advanced — Level 2',
     score,total:10,
     percentage:Math.round(pct*100)+'%',
+    skill_level:skill,
+    next_steps:steps.join(' | '),
+    time_taken:timeTaken,
     question_summary:mcSummary,
     open_responses:openSummary
   };
