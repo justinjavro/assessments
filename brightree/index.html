@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Brightree RCM Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#f5f3ef;--surface:#fff;--surface2:#faf8f5;--border:#e2ddd5;--orange:#E8681A;--navy:#1E2D4A;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;}html,body{width:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+.header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.hbrand{font-family:'DM Serif Display',serif;font-size:17px;color:var(--orange);}
+.hsub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.twrap{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;flex-shrink:0;}
+.tlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;}
+#timer{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--orange);min-width:50px;text-align:center;}
+#timer.warn{color:#d97706;}#timer.danger{color:#dc2626;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.progwrap{width:100%;height:3px;background:var(--border);}.progfill{height:100%;background:var(--orange);transition:width .4s ease;}
+.container{width:100%;max-width:760px;padding:28px 16px 60px;}
+.screen{display:none;flex-direction:column;gap:24px;animation:fadeUp .4s ease;}.screen.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;border:1px solid var(--orange);border-radius:4px;padding:4px 10px;display:inline-block;}
+.ititle{font-family:'DM Serif Display',serif;font-size:32px;line-height:1.15;color:var(--navy);}.ititle em{color:var(--orange);font-style:italic;}
+.idesc{font-size:14px;color:var(--muted);line-height:1.7;}
+.stats{display:flex;gap:10px;flex-wrap:wrap;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex:1;min-width:80px;}
+.sval{font-family:'DM Serif Display',serif;font-size:24px;color:var(--orange);}.slbl{font-size:11px;color:var(--muted);margin-top:4px;}
+.fwrap{display:flex;flex-direction:column;gap:14px;width:100%;max-width:420px;}
+.flbl{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;display:block;}
+.finput{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;width:100%;}
+.finput:focus{border-color:var(--orange);}
+.ferr{display:none;color:#dc2626;font-size:12px;margin-top:5px;font-family:'DM Mono',monospace;}
+.btn{border:none;border-radius:8px;padding:13px 28px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s;}
+.btnp{background:var(--orange);color:white;}.btnp:hover{opacity:.88;}.btnp:disabled{opacity:.35;cursor:not-allowed;}
+.qhdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.qcat{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.qnum{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.qtimer{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;}
+.qcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;display:flex;flex-direction:column;gap:20px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
+.qtext{font-family:'DM Serif Display',serif;font-size:19px;line-height:1.4;color:var(--navy);}
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s,background .15s;line-height:1.5;width:100%;}
+.opt:hover{border-color:var(--orange);background:rgba(232,104,26,.04);}
+.opt.sel{border-color:var(--orange);background:rgba(232,104,26,.07);}
+.olttr{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 7px;min-width:22px;text-align:center;margin-top:2px;flex-shrink:0;}
+.opt.sel .olttr{background:var(--orange);color:white;border-color:var(--orange);}
+.nav{display:flex;justify-content:flex-end;}.nav .btn{width:100%;}
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
+@media(min-width:560px){.container{padding:36px 24px 80px;}.ititle{font-size:36px;}.qcard{padding:28px;}.qtext{font-size:21px;}.nav .btn{width:auto;}.header{padding:14px 28px;}#timer{font-size:21px;}}
+@media(min-width:760px){.container{padding:40px 24px 80px;}.ititle{font-size:38px;}.qcard{padding:32px;}.header{padding:16px 32px;}#timer{font-size:22px;}}
+</style>
+</head>
+<body>
+<div class="header"><div><div class="hbrand">Javro</div><div class="hsub">Brightree RCM · Skills Assessment</div></div><div class="twrap"><div class="tlbl">Time</div><div id="timer">8:00</div></div></div>
+<div class="progwrap"><div class="progfill" id="prog" style="width:0%"></div></div>
+<div class="container">
+<div class="screen active" id="s-intro">
+<span class="badge">Candidate Assessment · Brightree RCM · 2026</span>
+<div class="ititle">Brightree DME<br/><em>Revenue Cycle</em> Assessment</div>
+<div class="idesc">This assessment evaluates your practical knowledge of the Brightree platform and DME revenue cycle management. Answer from experience — the timer is limited. No hints or answer guides are provided.</div>
+<div class="stats"><div class="stat"><div class="sval">10</div><div class="slbl">Questions</div></div><div class="stat"><div class="sval">8 min</div><div class="slbl">Time Limit</div></div><div class="stat"><div class="sval">MC Only</div><div class="slbl">Format</div></div></div>
+<div class="fwrap">
+<div><label class="flbl">Full Name</label><input class="finput" id="cname" type="text" placeholder="Jane Smith" autocomplete="name" oninput="clearErr('cname','name-err')"/><div class="ferr" id="name-err">✗ Full name is required before starting.</div></div>
+<div><label class="flbl">Email Address</label><input class="finput" id="cemail" type="email" placeholder="jane@email.com" autocomplete="email" oninput="clearErr('cemail','email-err')"/><div class="ferr" id="email-err">✗ A valid email address is required before starting.</div></div>
+<div><label class="flbl">Date</label><input class="finput" id="cdate" type="text" placeholder="e.g. March 25, 2026" oninput="clearErr('cdate','date-err')"/><div class="ferr" id="date-err">✗ Date is required before starting.</div></div>
+</div>
+<button class="btn btnp" onclick="start()">Begin Assessment →</button>
+</div>
+<div class="screen" id="s-question">
+<div class="qhdr"><div class="qcat" id="qcat">Category</div><div style="display:flex;align-items:center;gap:8px;"><div class="qtimer" id="qtimer">0s on question</div><div class="qnum" id="qnum">Q 1 / 10</div></div></div>
+<div class="qcard"><div class="qtext" id="qtext"></div><div class="opts" id="qopts"></div></div>
+<div class="nav"><button class="btn btnp" id="btnn" disabled onclick="next()">Next →</button></div>
+</div>
+<div class="screen" id="s-results">
+<div class="rcard">
+<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;">✦ Assessment Complete</div>
+<div style="font-family:'DM Serif Display',serif;font-size:30px;line-height:1.2;margin-top:8px;color:var(--navy);">Thank you for completing the assessment.</div>
+<div style="font-size:14px;color:var(--muted);line-height:1.8;margin-top:8px;">Your responses have been submitted to the Javro team for review. If your qualifications are a strong match, a team member will be in touch with next steps.<br/><br/>We appreciate your time and interest in working with Javro.</div>
+<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px;" id="rname"></div>
+</div>
+</div>
+</div>
+<script>
+var BACKEND_URL='https://script.google.com/macros/s/AKfycby8tFdBrdycIgxIxym7m8rXijNtCfo8DMDzFCdI5r4h8frVbJNwGO2DIxj_kYDqb70f/exec';
+var Qs=[
+{cat:'Brightree Navigation',ans:2,text:'When you first log into Brightree to begin your day, which area do you typically use to view and manage your assigned patient accounts and pending tasks?',opts:['The Reports tab — running a full financial report before doing anything else','The Admin Settings panel — to check system configuration each morning','The Dashboard / Work Queue — where open tasks, pending orders, and follow-ups are organized by priority','The Patient Search bar — manually searching for each patient one by one']},
+{cat:'Order & Claim Workflow',ans:0,text:'In Brightree, what is the general sequence a DME order follows from intake through claim submission?',opts:['Patient Intake → Insurance Verification → Order Entry → Delivery Confirmation → Claim Generation → Submission to Clearinghouse','Claim Generation → Patient Intake → Insurance Verification → Delivery Confirmation → Order Entry → Submission','Insurance Verification → Submission to Clearinghouse → Delivery Confirmation → Patient Intake → Order Entry','Order Entry → Claim Generation → Submission → Insurance Verification → Delivery Confirmation']},
+{cat:'Insurance & Eligibility',ans:1,text:'Before a DME claim can be submitted in Brightree, insurance eligibility must be verified. Which best describes how eligibility verification typically works within the platform?',opts:['Eligibility must always be checked by calling the insurance company directly — Brightree has no electronic verification capability','Brightree can run electronic eligibility checks through integrated payer connections, returning coverage details, copay information, and authorization requirements directly in the patient record','Eligibility verification is only available for Medicare patients, not commercial payers','Eligibility is automatically verified when a claim is submitted — no separate check is needed beforehand']},
+{cat:'Cash Posting',ans:3,text:'You receive both Electronic Remittance Advices (ERAs) and paper/PDF Explanation of Benefits (EOBs) for payment posting. In Brightree, what is the key operational difference?',opts:['ERAs and EOBs are processed identically in Brightree — there is no difference','EOBs are posted automatically while ERAs require manual data entry','ERAs can only be used for Medicare, while EOBs are used for all other payers','ERAs are electronically imported and can be auto-posted or posted with minimal manual entry; EOBs require you to manually key in payment details, adjustment codes, and patient responsibility']},
+{cat:'AR Follow-Up',ans:2,text:'You\'re reviewing an AR aging report in Brightree and notice several claims in the 60–90 day bucket. What is the most effective first step?',opts:['Resubmit all claims in the 60–90 day bucket as new claims to restart the process','Wait until claims reach 120+ days before investigating, since payers often pay late','Sort and prioritize by dollar amount and payer, then check claim status in Brightree and on the payer portal to determine why payment is outstanding before taking action','Write off all claims over 60 days since they are unlikely to be collected']},
+{cat:'Denial Identification',ans:0,text:'When a claim is denied by a payer in Brightree, how do you typically identify the denial reason and determine your next step?',opts:['Review the remittance advice (ERA/EOB) for the CARC and RARC codes, cross-reference with the claim details in Brightree, and determine whether to correct and resubmit, appeal, or escalate','Delete the denied claim and create a completely new claim from scratch','Forward the denial to the client and wait for them to tell you what to do','Immediately call the payer without reviewing any denial details first']},
+{cat:'Compliance Basics',ans:1,text:'For certain DME items like CPAP machines or hospital beds, Medicare requires a Certificate of Medical Necessity (CMN). In the Brightree workflow, what is the CMN\'s role?',opts:['The CMN is generated automatically by Brightree after claim submission — no manual steps are needed','The CMN documents the physician\'s medical justification for the equipment and must be completed and on file before the claim can be submitted for reimbursement','The CMN is a patient consent form that the patient signs at delivery','The CMN is an optional document that improves the chance of approval but isn\'t required']},
+{cat:'Payer Knowledge',ans:3,text:'A DME claim submitted to Medicare returns a denial stating the patient\'s coverage is through a Medicare Advantage (Part C) plan, not Original Medicare. What does this mean for your next step?',opts:['Appeal the denial to Medicare since all Medicare patients are billed the same way','Write off the claim — if Medicare denied it, no other payer will cover it','The patient must pay out-of-pocket because Medicare Advantage plans don\'t cover DME','The claim needs to be resubmitted to the specific Medicare Advantage plan (the private insurer), since MA plans have their own billing rules, portals, and prior authorization requirements']},
+{cat:'Reconciliation & Accuracy',ans:1,text:'At the end of a payment posting session, the total payments you posted in Brightree don\'t match the bank deposit amount. What is the most appropriate approach?',opts:['Adjust the last payment posted to make the numbers match, then move on','Systematically compare posted payments against remittance advices and deposit detail line by line to identify the discrepancy — it could be a missed payment, posting error, or unapplied amount','Post the difference as a generic \'miscellaneous adjustment\' to balance the books','Ignore the discrepancy if it\'s under $100 — small variances are expected and normal']},
+{cat:'Process & Communication',ans:2,text:'You discover that the documentation on file is insufficient for the payer to process a claim. The missing information needs to come from the patient\'s physician. What is your next step?',opts:['Submit the claim anyway and hope the payer doesn\'t notice the missing documentation','Call the physician\'s office yourself to request the documentation without informing your team or client','Flag the order in Brightree with the documentation gap, notify the appropriate team member or client contact responsible for physician communication, and track it for follow-up until resolved','Close the order and mark it as unbillable without notifying anyone']}
+];
+var cur=0,sel=Array(Qs.length).fill(null),tmr,secs=480,cName='',cEmail='',cDate='';
+var startTime=null,qStartTime=0,qTimes={},tabSwitches=0;
+document.addEventListener('visibilitychange',function(){if(document.hidden&&tmr)tabSwitches++;});
+function clearErr(i,e){document.getElementById(i).style.borderColor='var(--border)';document.getElementById(e).style.display='none';}
+function start(){var n=document.getElementById('cname').value.trim(),e=document.getElementById('cemail').value.trim(),d=document.getElementById('cdate').value.trim(),eOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e),ok=true;if(!n){document.getElementById('cname').style.borderColor='#dc2626';document.getElementById('name-err').style.display='block';ok=false;}if(!e||!eOk){document.getElementById('cemail').style.borderColor='#dc2626';document.getElementById('email-err').style.display='block';ok=false;}if(!d){document.getElementById('cdate').style.borderColor='#dc2626';document.getElementById('date-err').style.display='block';ok=false;}if(!ok)return;cName=n;cEmail=e;cDate=d;startTime=new Date();Qs.forEach(function(_,i){qTimes[i]=0;});qStartTime=Date.now();show('s-question');tmr=setInterval(tick,1000);render();}
+function tick(){secs--;var el=document.getElementById('timer');el.textContent=Math.floor(secs/60)+':'+(secs%60).toString().padStart(2,'0');el.className=secs<=60?'danger':secs<=120?'warn':'';if(qStartTime>0)document.getElementById('qtimer').textContent=Math.round((Date.now()-qStartTime)/1000)+'s on question';if(secs<=0){clearInterval(tmr);finish();}}
+function render(){var q=Qs[cur];document.getElementById('qcat').textContent=q.cat;document.getElementById('qnum').textContent='Q '+(cur+1)+' / '+Qs.length;document.getElementById('qtext').textContent=q.text;var qE=Math.round(qTimes[cur]||0);document.getElementById('qtimer').textContent=qE>0?qE+'s spent':'0s on question';var o=document.getElementById('qopts');o.innerHTML='';['A','B','C','D'].forEach(function(l,i){var b=document.createElement('button');b.className='opt'+(sel[cur]===i?' sel':'');b.innerHTML='<span class="olttr">'+l+'</span>'+q.opts[i];b.onclick=function(){pick(i);};o.appendChild(b);});document.getElementById('btnn').disabled=sel[cur]===null;document.getElementById('prog').style.width=(cur/Qs.length*100)+'%';window.scrollTo({top:0,behavior:'smooth'});}
+function pick(i){sel[cur]=i;document.querySelectorAll('.opt').forEach(function(b,idx){b.classList.toggle('sel',idx===i);});document.getElementById('btnn').disabled=false;}
+function recordQTime(){if(qStartTime>0){qTimes[cur]=(qTimes[cur]||0)+(Date.now()-qStartTime)/1000;qStartTime=Date.now();}}
+function next(){recordQTime();cur++;if(cur>=Qs.length){finish();return;}qStartTime=Date.now();var s=document.getElementById('s-question');s.style.animation='none';void s.offsetWidth;s.style.animation='fadeUp .35s ease';render();}
+function finish(){clearInterval(tmr);recordQTime();document.getElementById('prog').style.width='100%';var endTime=new Date(),elapsed=Math.floor((endTime-startTime)/1000),mins=Math.floor(elapsed/60),sec2=elapsed%60,timeTaken=mins+' min '+sec2+' sec';var correct=Qs.filter(function(q,i){return sel[i]===q.ans;}).length,pct=correct/Qs.length;var skill,steps;if(pct>=.80){skill='Strong Brightree Foundation';steps=['Advance to live technical interview.','Your detailed results will be reviewed by the hiring manager.','Expect follow-up within 2\u20133 business days.'];}else if(pct>=.60){skill='Developing \u2014 Some Gaps';steps=['A follow-up conversation may be scheduled to explore specific areas.','Review core Brightree workflows: claims lifecycle, posting, and denial management.','Expect follow-up within 3\u20135 business days.'];}else if(pct>=.40){skill='Foundational Gaps \u2014 Training Required';steps=['Significant training would be needed on Brightree platform and DME billing fundamentals.','Focus areas: eligibility, claim workflow, ERA/EOB posting, and payer knowledge.','You may be considered for a structured training track.'];}else{skill='Not Yet Ready';steps=['Brightree platform experience does not meet current requirements.','We recommend hands-on Brightree experience before reapplying.','You are welcome to reapply after gaining additional platform experience.'];}
+var L=['A','B','C','D'],timingFlags=[];Qs.forEach(function(q,i){var t=Math.round(qTimes[i]||0),flag='';if(t>90)flag=' \u26A0 LONG';else if(t>60)flag=' \u25B3 Elevated';timingFlags.push('Q'+(i+1)+': '+t+'s'+flag);});var avgTime=Math.round(Object.values(qTimes).reduce(function(a,b){return a+b;},0)/Qs.length);var speedNote='Avg '+avgTime+'s/q';if(tabSwitches>0)speedNote+=' | '+tabSwitches+' tab switch(es)';var longQs=Object.values(qTimes).filter(function(t){return t>90;}).length;if(longQs>=3)speedNote+=' | CAUTION: '+longQs+' questions >90s';else if(longQs>=1)speedNote+=' | NOTE: '+longQs+' q(s) >90s';
+var summary=Qs.map(function(q,i){var chosen=sel[i]!==null?L[sel[i]]:'\u2014';var result=sel[i]===q.ans?'\u2713 CORRECT':'\u2717 INCORRECT';var t=Math.round(qTimes[i]||0);return 'Q'+(i+1)+' ['+q.cat+']: Answered '+chosen+' | Correct: '+L[q.ans]+' | '+t+'s | '+result;}).join('\n');
+document.getElementById('rname').textContent=cName+' \u00B7 '+cEmail+' \u00B7 '+timeTaken+' \u00B7 '+cDate;show('s-results');
+fetch(BACKEND_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({candidate_name:cName,candidate_email:cEmail,date_taken:cDate,time_taken:timeTaken+' | '+speedNote+' | Timing: '+timingFlags.join(', '),assessment:'Brightree RCM \u2014 Revenue Cycle Skills Assessment',score:correct,total:Qs.length,percentage:Math.round(pct*100)+'%',skill_level:skill,next_steps:steps.join(' | '),question_summary:summary})}).then(function(){console.log('Submitted');}).catch(function(err){console.error('Error:',err);});}
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+</script>
+</body>
+</html>
