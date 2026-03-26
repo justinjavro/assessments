@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GL Advanced Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2230;--border:#2a3245;--orange:#E8681A;--text:#e2e8f0;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+.header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hbrand{font-family:'DM Serif Display',serif;font-size:18px;color:var(--orange);}
+.hsub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.twrap{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 16px;}
+.tlbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;}
+#timer{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--orange);min-width:58px;text-align:center;}
+#timer.warn{color:#f59e0b;}
+#timer.danger{color:#ef4444;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.progwrap{width:100%;height:3px;background:var(--border);}
+.progfill{height:100%;background:var(--orange);transition:width .4s ease;}
+.container{width:100%;max-width:760px;padding:40px 24px 80px;}
+.screen{display:none;flex-direction:column;gap:28px;animation:fadeUp .4s ease;}
+.screen.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.badge{font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;border:1px solid var(--orange);border-radius:4px;padding:4px 10px;display:inline-block;}
+.ititle{font-family:'DM Serif Display',serif;font-size:38px;line-height:1.1;}
+.ititle em{color:var(--orange);font-style:italic;}
+.idesc{font-size:14px;color:#94a3b8;line-height:1.7;max-width:540px;}
+.stats{display:flex;gap:14px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;flex:1;}
+.sval{font-family:'DM Serif Display',serif;font-size:26px;color:var(--orange);}
+.slbl{font-size:12px;color:var(--muted);margin-top:4px;}
+.fwrap{display:flex;flex-direction:column;gap:12px;max-width:380px;}
+.flbl{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;display:block;}
+.finput{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;width:100%;}
+.finput:focus{border-color:var(--orange);}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;}
+.btn{border:none;border-radius:8px;padding:12px 28px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;}
+.btnp{background:var(--orange);color:white;}
+.btnp:hover{opacity:.88;}
+.btnp:disabled{opacity:.35;cursor:not-allowed;}
+.qhdr{display:flex;align-items:center;justify-content:space-between;}
+.qcat{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border-radius:4px;background:var(--surface2);color:#94a3b8;border:1px solid var(--border);}
+.qnum{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.qcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:24px;}
+.qscen{background:var(--surface2);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;color:#94a3b8;line-height:1.6;font-style:italic;}
+.qtext{font-family:'DM Serif Display',serif;font-size:21px;line-height:1.35;}
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s,background .15s;line-height:1.5;}
+.opt:hover{border-color:var(--orange);background:rgba(232,104,26,.06);}
+.opt.sel{border-color:var(--orange);background:rgba(232,104,26,.1);}
+.olttr{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface);border-radius:4px;padding:2px 7px;min-width:22px;text-align:center;margin-top:1px;flex-shrink:0;}
+.opt.sel .olttr{background:var(--orange);color:white;}
+.ota{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;width:100%;resize:vertical;min-height:130px;outline:none;}
+.ota:focus{border-color:var(--orange);}
+.nav{display:flex;justify-content:flex-end;}
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:40px;display:flex;flex-direction:column;gap:16px;}
+</style>
+</head>
+<body>
 
+<div class="header">
+  <div><div class="hbrand">Javro</div><div class="hsub">GL Advanced · Level 2 Assessment</div></div>
+  <div class="twrap"><div class="tlbl">Time Left</div><div id="timer">15:00</div></div>
+</div>
+<div class="progwrap"><div class="progfill" id="prog" style="width:0%"></div></div>
+
+<div class="container">
+
+  <div class="screen active" id="s-intro">
+    <span class="badge">Candidate Assessment · Level 2 · 2026</span>
+    <div class="ititle">GL Bookkeeping<br/><em>Advanced</em> Assessment</div>
+    <div class="idesc">This assessment evaluates applied month-end close preparation, complex transactions, and data integrity. Work independently — no hints are available.</div>
+    <div class="stats">
+      <div class="stat"><div class="sval">13</div><div class="slbl">Questions</div></div>
+      <div class="stat"><div class="sval">15 min</div><div class="slbl">Time Limit</div></div>
+      <div class="stat"><div class="sval">MC + Written</div><div class="slbl">Format</div></div>
+    </div>
+    <div class="fwrap">
+      <div><label class="flbl">Full Name</label><input class="finput" id="cname" type="text" placeholder="Jane Smith"/></div>
+      <div><label class="flbl">Email Address</label><input class="finput" id="cemail" type="email" placeholder="jane@email.com"/></div>
+      <div><label class="flbl">Date Taken</label><input class="finput" id="cdate" type="date"/></div>
+    </div>
+    <button class="btn btnp" onclick="start()">Begin Assessment →</button>
+  </div>
+
+  <div class="screen" id="s-question">
+    <div class="qhdr">
+      <div class="qcat" id="qcat">Category</div>
+      <div class="qnum" id="qnum">Q 1 / 13</div>
+    </div>
+    <div class="qcard">
+      <div class="qscen" id="qscen" style="display:none"></div>
+      <div class="qtext" id="qtext"></div>
+      <div id="qbody"></div>
+    </div>
+    <div class="nav"><button class="btn btnp" id="btnn" disabled onclick="next()">Next →</button></div>
+  </div>
+
+  <div class="screen" id="s-results">
+    <div class="rcard">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;">✦ Assessment Complete</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:36px;line-height:1.15;margin-top:8px;">Thank you for completing<br/>the assessment.</div>
+      <div style="font-size:15px;color:#94a3b8;line-height:1.8;max-width:520px;margin-top:8px;">Your responses have been submitted to the Javro team for review. If your qualifications are a strong match, a team member will be in touch with next steps.<br/><br/>We appreciate your time and interest in working with Javro.</div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px;" id="rname"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SHEET_URL='https://script.google.com/macros/s/AKfycbxlAquxka4dOZO-mKEytY1_L5oZCjliWhJ4ho483RLhXzRglfpPQRXHgfW_js9uzk5YVA/exec';
+const L=['A','B','C','D'];
+
+const Qs=[
+  {type:'mc',cat:'Balance Sheet',scen:'A company borrows a two-year bank loan of $1,000.',text:'What are the balance sheet effects of this transaction?',opts:['$1,000 credit in current liabilities; $1,000 debit in current assets','$1,000 credit in current liabilities; $1,000 debit in non-current assets','$1,000 credit in non-current liabilities; $1,000 debit in current assets','$1,000 credit in non-current liabilities; $1,000 debit in non-current assets'],ans:2},
+  {type:'mc',cat:'Debits & Credits',scen:null,text:'Which pair of accounts is increased by recording a credit?',opts:['Notes Payable and Service Revenue','Common Stock and Rent Expense','Cash and Accounts Receivable','Accrued Expenses and Accounts Payable'],ans:0},
+  {type:'mc',cat:'Accounting Concepts',scen:null,text:'Using the accrual method, what account is credited when a customer pays in advance for services to be delivered in a future period?',opts:['Accounts Payable','Unearned Revenue','Deposits','Accounts Receivable'],ans:1},
+  {type:'mc',cat:'Trial Balance — Problem Solving',scen:null,text:'Your trial balance is out of balance by $180. All journal entries appear to have equal debits and credits. Which is the MOST likely cause?',opts:['A payment was recorded in the wrong accounting period','A $1,980 amount was entered as $1,800 — a transposition error','An expense was posted to the wrong account category','A duplicate entry was recorded for the same transaction'],ans:1},
+  {type:'mc',cat:'Adjusting Entries',scen:'A company\'s weekly payroll of $750 is paid on Fridays. There are five workdays in the pay period. The last day of the month falls on a Wednesday.',text:'Which adjusting journal entry is required at month-end?',opts:['Debit Unpaid Salaries, Credit Salaries Payable for $450','Debit Salaries Expense, Credit Salaries Payable for $450','Debit Salaries Expense, Credit Salaries Payable for $300','Debit Salaries Payable, Credit Salaries Expense for $450'],ans:1},
+  {type:'mc',cat:'Adjusting Entries',scen:'On the 5th of each month, a company pays a 3% commission on the prior month\'s sales of $1,200,000.',text:'What is the required adjusting entry at the end of the prior month?',opts:['Debit Sales $36,000, Credit Sales Commission Expense $36,000','Debit Sales Commission Expense $36,000, Credit Accounts Receivable $36,000','Debit Sales $36,000, Credit Sales Commission Income $36,000','Debit Sales Commission Expense $36,000, Credit Sales Commission Payable $36,000'],ans:3},
+  {type:'mc',cat:'Depreciation',scen:'A company purchased equipment for $60,000 with an estimated useful life of 8 years and a salvage value of $6,000.',text:'Using the straight-line method, what is the depreciation expense for Year 2?',opts:['$6,750','$7,500','$15,000','$13,500'],ans:0},
+  {type:'mc',cat:'Fixed Assets',scen:'A company sold equipment for $100,000. The equipment had an original cost of $300,000 and accumulated depreciation of $180,000.',text:'The journal entry to record the sale would include a:',opts:['Credit to Sale of Equipment for $100,000','Debit to Equipment for $300,000','Debit to Loss on Sale of Equipment for $20,000','Credit to Equipment for $120,000'],ans:2},
+  {type:'mc',cat:'Intercompany Transactions',scen:'Entity X loans $15,000 to Entity Y. Both are under the same parent company.',text:'How should this be recorded in each entity\'s books?',opts:['Entity X: Debit Expense / Credit Cash; Entity Y: Debit Cash / Credit Revenue','Record only in the parent\'s consolidated books — individual entities are unaffected','Entity X: Debit Cash / Credit Loan Payable; Entity Y: Debit Loan Receivable / Credit Cash','Entity X: Debit Intercompany Receivable $15,000 / Credit Cash $15,000; Entity Y: Debit Cash $15,000 / Credit Intercompany Payable $15,000'],ans:3},
+  {type:'mc',cat:'Accounts Payable',scen:null,text:'Which of the following would require a credit entry to Accounts Payable?',opts:['Purchases','Purchase discounts','Payment to supplier','Purchase returns'],ans:0},
+  {type:'open',cat:'Bank Reconciliation',scen:'While completing a month-end bank reconciliation, the bank statement balance is $4,200 higher than your QuickBooks balance after accounting for all known outstanding checks and deposits in transit.',text:'Walk through how you would investigate and resolve this discrepancy. What steps would you take and what documentation would you produce?'},
+  {type:'open',cat:'Systems & Automation',scen:null,text:'Many bookkeeping tasks are highly repetitive — month-end closes, reconciliations, report preparation. Describe the tools, templates, or systems you have personally built or used to make repeatable tasks faster and more accurate. Be specific — include any work papers, macros, checklists, or automation you have created or leveraged.'},
+  {type:'open',cat:'Work Paper Lifecycle & Data Integrity',scen:'You receive a raw GL export from a client and a month-end template. You do not have access to any data other than what is provided. You notice the Total Assets on your reconstructed work paper do not match the raw Trial Balance export by $14,200.',text:'Briefly describe your 3-step process to "tie out" this work paper. How do you use the raw data to find the discrepancy, and what specific check or control do you add to the Excel template to ensure this work paper remains in balance for the final close?'}
+];
+
+let cur=0,sel=Array(Qs.length).fill(null),openR={},tmr,secs=900,cName='',cEmail='',cDate='';
+
+function start(){
+  const n=document.getElementById('cname').value.trim();
+  const e=document.getElementById('cemail').value.trim();
+  const d=document.getElementById('cdate').value;
+  if(!n||!e||!d){alert('Please enter your name, email, and date.');return;}
+  cName=n; cEmail=e;
+  const dt=new Date(d);
+  cDate=dt.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  show('s-question');tmr=setInterval(tick,1000);render();
+}
+
+function tick(){
+  secs--;
+  const el=document.getElementById('timer');
+  el.textContent=`${Math.floor(secs/60)}:${(secs%60).toString().padStart(2,'0')}`;
+  el.className=secs<=120?'danger':secs<=300?'warn':'';
+  if(secs<=0){clearInterval(tmr);finish();}
+}
+
+function render(){
+  const q=Qs[cur];
+  document.getElementById('qcat').textContent=q.cat;
+  document.getElementById('qnum').textContent=`Q ${cur+1} / ${Qs.length}`;
+  document.getElementById('qtext').textContent=q.text;
+  const sc=document.getElementById('qscen');
+  if(q.scen){sc.textContent=q.scen;sc.style.display='block';}else sc.style.display='none';
+  const body=document.getElementById('qbody');body.innerHTML='';
+  if(q.type==='mc'){
+    const wrap=document.createElement('div');wrap.className='opts';
+    L.forEach((l,i)=>{
+      const b=document.createElement('button');
+      b.className='opt'+(sel[cur]===i?' sel':'');
+      b.innerHTML=`<span class="olttr">${l}</span>${q.opts[i]}`;
+      b.onclick=()=>pick(i);
+      wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+    document.getElementById('btnn').disabled=sel[cur]===null;
+  }else{
+    const ta=document.createElement('textarea');ta.className='ota';ta.id='ota';
+    ta.placeholder='Type your response here…';
+    if(openR[cur])ta.value=openR[cur];
+    ta.oninput=()=>{openR[cur]=ta.value;document.getElementById('btnn').disabled=ta.value.trim().length<15;};
+    body.appendChild(ta);
+    document.getElementById('btnn').disabled=!(openR[cur]&&openR[cur].trim().length>=15);
+  }
+  document.getElementById('prog').style.width=`${cur/Qs.length*100}%`;
+}
+
+function pick(i){
+  sel[cur]=i;
+  document.querySelectorAll('.opt').forEach((b,idx)=>b.classList.toggle('sel',idx===i));
+  document.getElementById('btnn').disabled=false;
+}
+
+function next(){
+  if(Qs[cur].type==='open'){const ta=document.getElementById('ota');if(ta)openR[cur]=ta.value;sel[cur]='open';}
+  cur++;
+  if(cur>=Qs.length){finish();return;}
+  const s=document.getElementById('s-question');
+  s.style.animation='none';void s.offsetWidth;s.style.animation='fadeUp .35s ease';
+  render();
+}
+
+function finish(){
+  clearInterval(tmr);
+  document.getElementById('prog').style.width='100%';
+  const mcQs=Qs.filter(q=>q.type==='mc');
+  const correct=mcQs.filter(q=>{const i=Qs.indexOf(q);return sel[i]===q.ans;}).length;
+  const pct=correct/mcQs.length;
+  document.getElementById('rname').textContent=`${cName}  ·  ${cDate}`;
+  show('s-results');
+  sendToSheet(correct,pct);
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function sendToSheet(score,pct){
+  const mcSummary=Qs.map((q,i)=>{
+    if(q.type!=='mc')return null;
+    const chosen=sel[i]!==null?L[sel[i]]:'—';
+    const correct=L[q.ans];
+    const result=sel[i]===q.ans?'✓ CORRECT':'✗ INCORRECT';
+    return `Q${i+1} [${q.cat}]: Answered ${chosen} | Correct: ${correct} | ${result}`;
+  }).filter(Boolean).join('\n');
+
+  const openSummary=Qs.map((q,i)=>{
+    if(q.type!=='open')return null;
+    return `Q${i+1} [${q.cat}]:\n"${openR[i]||'No response provided'}"`;
+  }).filter(Boolean).join('\n\n');
+
+  const params={
+    candidate_name:cName,candidate_email:cEmail,date_taken:cDate,
+    assessment:'GL Advanced — Level 2',
+    score,total:10,
+    percentage:Math.round(pct*100)+'%',
+    question_summary:mcSummary,
+    open_responses:openSummary
+  };
+
+  fetch(SHEET_URL,{
+    method:'POST',mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(params)
+  }).then(()=>console.log('Submitted')).catch(e=>console.error(e));
+}
+</script>
+</body>
+</html>
