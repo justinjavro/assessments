@@ -1,1 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GNS Intake Specialist Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f5f3ef;--surface:#fff;--surface2:#faf8f5;--border:#e2ddd5;
+  --orange:#E8681A;--navy:#1E2D4A;--text:#1e293b;--muted:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
 
+/* ── HEADER ── */
+.header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.hbrand{font-family:'DM Serif Display',serif;font-size:17px;color:var(--orange);}
+.hsub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.twrap{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;flex-shrink:0;}
+.tlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;}
+#timer{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--orange);min-width:50px;text-align:center;}
+#timer.warn{color:#d97706;}
+#timer.danger{color:#dc2626;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── PROGRESS ── */
+.progwrap{width:100%;height:3px;background:var(--border);}
+.progfill{height:100%;background:var(--orange);transition:width .4s ease;}
+
+/* ── LAYOUT ── */
+.container{width:100%;max-width:760px;padding:28px 16px 60px;}
+.screen{display:none;flex-direction:column;gap:24px;animation:fadeUp .4s ease;}
+.screen.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── INTRO ── */
+.badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;border:1px solid var(--orange);border-radius:4px;padding:4px 10px;display:inline-block;}
+.ititle{font-family:'DM Serif Display',serif;font-size:32px;line-height:1.15;color:var(--navy);}
+.ititle em{color:var(--orange);font-style:italic;}
+.idesc{font-size:14px;color:var(--muted);line-height:1.7;}
+.stats{display:flex;gap:10px;flex-wrap:wrap;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex:1;min-width:80px;}
+.sval{font-family:'DM Serif Display',serif;font-size:24px;color:var(--orange);}
+.slbl{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* ── FORM ── */
+.fwrap{display:flex;flex-direction:column;gap:14px;width:100%;max-width:420px;}
+.flbl{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;display:block;}
+.finput{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;width:100%;transition:border-color .15s;}
+.finput:focus{border-color:var(--orange);}
+input[type="date"].finput{appearance:auto;-webkit-appearance:auto;cursor:pointer;}
+input[type="date"].finput::-webkit-calendar-picker-indicator{opacity:.45;cursor:pointer;filter:none;}
+.ferr{display:none;color:#dc2626;font-size:12px;margin-top:5px;font-family:'DM Mono',monospace;}
+
+/* ── BUTTON ── */
+.btn{border:none;border-radius:8px;padding:13px 28px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btnp{background:var(--orange);color:white;}
+.btnp:hover{opacity:.88;}
+.btnp:active{transform:scale(.98);}
+.btnp:disabled{opacity:.35;cursor:not-allowed;}
+
+/* ── QUESTION HEADER ── */
+.qhdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.qcat{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.qnum{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.qtimer{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;}
+
+/* ── QUESTION CARD ── */
+.qcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;display:flex;flex-direction:column;gap:20px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
+.qtext{font-family:'DM Serif Display',serif;font-size:19px;line-height:1.4;color:var(--navy);}
+.opts{display:flex;flex-direction:column;gap:10px;}
+
+/* ── OPTIONS — always re-selectable ── */
+.opt{
+  background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;
+  padding:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;
+  cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+  line-height:1.5;width:100%;position:relative;
+}
+.opt:hover{border-color:var(--orange);background:rgba(232,104,26,.04);}
+.opt.sel{border-color:var(--orange);background:rgba(232,104,26,.07);box-shadow:0 0 0 3px rgba(232,104,26,.08);}
+.opt.sel::after{content:'';position:absolute;top:12px;right:14px;width:7px;height:7px;border-radius:50%;background:var(--orange);}
+.olttr{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);border-radius:4px;
+  padding:2px 7px;min-width:22px;text-align:center;margin-top:2px;flex-shrink:0;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.opt.sel .olttr{background:var(--orange);color:white;border-color:var(--orange);}
+
+/* change hint — slides in after first pick */
+.change-hint{
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);
+  text-align:center;opacity:0;transform:translateY(4px);
+  transition:opacity .4s ease, transform .4s ease;letter-spacing:.04em;
+}
+.change-hint.show{opacity:1;transform:translateY(0);}
+
+/* ── NAV ── */
+.nav{display:flex;justify-content:flex-end;}
+.nav .btn{width:100%;}
+
+/* ── RESULTS ── */
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
+
+/* ── RESPONSIVE ── */
+@media(min-width:560px){
+  .container{padding:36px 24px 80px;}.ititle{font-size:36px;}.qcard{padding:28px;}.qtext{font-size:21px;}
+  .nav .btn{width:auto;}.header{padding:14px 28px;}#timer{font-size:21px;}
+}
+@media(min-width:760px){
+  .container{padding:40px 24px 80px;}.ititle{font-size:38px;}.qcard{padding:32px;}
+  .header{padding:16px 32px;}#timer{font-size:22px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="hbrand">Javro</div>
+    <div class="hsub">GNS Intake Specialist · Skills Assessment</div>
+  </div>
+  <div class="twrap">
+    <div class="tlbl">Time</div>
+    <div id="timer">10:00</div>
+  </div>
+</div>
+<div class="progwrap"><div class="progfill" id="prog" style="width:0%"></div></div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="screen active" id="s-intro">
+    <span class="badge">Candidate Assessment · GNS Intake · 2026</span>
+    <div class="ititle">GNS DME Intake<br/><em>Specialist</em> Assessment</div>
+    <div class="idesc">This assessment evaluates your practical knowledge of fax routing, data entry, and foundational Brightree platform operations. Answer from experience — the timer is limited. No hints or answer guides are provided.</div>
+    <div class="stats">
+      <div class="stat"><div class="sval">14</div><div class="slbl">Questions</div></div>
+      <div class="stat"><div class="sval">10 min</div><div class="slbl">Time Limit</div></div>
+      <div class="stat"><div class="sval">MC Only</div><div class="slbl">Format</div></div>
+    </div>
+    <div class="fwrap">
+      <div>
+        <label class="flbl">Full Name</label>
+        <input class="finput" id="cname" type="text" placeholder="Jane Smith" autocomplete="name" oninput="clearErr('cname','name-err')"/>
+        <div class="ferr" id="name-err">✗ Full name is required before starting.</div>
+      </div>
+      <div>
+        <label class="flbl">Email Address</label>
+        <input class="finput" id="cemail" type="email" placeholder="jane@email.com" autocomplete="email" oninput="clearErr('cemail','email-err')"/>
+        <div class="ferr" id="email-err">✗ A valid email address is required before starting.</div>
+      </div>
+      <div>
+        <label class="flbl">Date</label>
+        <input class="finput" id="cdate" type="date" oninput="clearErr('cdate','date-err')"/>
+        <div class="ferr" id="date-err">✗ Date is required before starting.</div>
+      </div>
+    </div>
+    <button class="btn btnp" onclick="start()">Begin Assessment →</button>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="screen" id="s-question">
+    <div class="qhdr">
+      <div class="qcat" id="qcat">Category</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="qtimer" id="qtimer">0s on question</div>
+        <div class="qnum" id="qnum">Q 1 / 14</div>
+      </div>
+    </div>
+    <div class="qcard">
+      <div class="qtext" id="qtext"></div>
+      <div class="opts" id="qopts"></div>
+      <div class="change-hint" id="change-hint">You can change your selection at any time before continuing →</div>
+    </div>
+    <div class="nav">
+      <button class="btn btnp" id="btnn" disabled onclick="next()">Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="s-results">
+    <div class="rcard">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;">✦ Assessment Complete</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:30px;line-height:1.2;margin-top:8px;color:var(--navy);">Thank you for completing the assessment.</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.8;margin-top:8px;">Your responses have been submitted to the Javro team for review. If your qualifications are a strong match, a team member will be in touch with next steps.<br/><br/>We appreciate your time and interest in working with Javro.</div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px;" id="rname"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var BACKEND_URL='YOUR_GNS_INTAKE_APPS_SCRIPT_URL_HERE';
+
+var Qs=[
+  {cat:'HIPAA & Fax Integrity',ans:1,
+   text:'You are processing an inbound fax and find that it contains sensitive medical information for five different patients on the same transmission. What is the most secure and efficient way to handle this?',
+   opts:['Upload the entire document to each of the five patient records to ensure nothing is missed.',
+         'Use a document splitting tool to create five separate files, ensuring each patient\'s record only contains their own information.',
+         'Process only the first patient and delete the rest of the fax to avoid data clutter.',
+         'Notify the sender that you cannot process multi-patient faxes and ask them to resend them individually.']},
+
+  {cat:'Brightree Navigation & Daily Start',ans:2,
+   text:'You are beginning your shift as a DME Intake Specialist. Where in Brightree should you go to locate the inbound faxes that need to be worked through?',
+   opts:['The Brightree home dashboard — all incoming faxes appear automatically on the main screen.',
+         'The Patient Search bar — search for each expected patient to find their associated faxes.',
+         'Home → Electronic Fax → Inbound Worklist → Unassigned tab — this is where unworked faxes that need to be processed are located.',
+         'The Reports tab — run a daily fax activity report to see what came in overnight.']},
+
+  {cat:'Missing Referral Information',ans:3,
+   text:'You are processing a new referral in Brightree and notice that a key piece of information is missing — such as a diagnosis code or insurance information. What is the correct action?',
+   opts:['Enter the referral anyway and leave the missing field blank to avoid a delay.',
+         'Contact the physician\'s office directly to request the missing information before entering anything.',
+         'Choose the closest matching value from a dropdown and make a note to correct it later.',
+         'Flag the record for internal review and add a clear note identifying exactly what is missing so the responsible team member can follow up.']},
+
+  {cat:'Insurance Entry & Completeness',ans:0,
+   text:'You receive a referral that lists two insurance policies for the patient. What should you do when entering this information into Brightree?',
+   opts:['Add both insurance policies to the patient file exactly as they appear on the referral, so the verification team has complete information to work with.',
+         'Enter only the first insurance listed, as the system can only process one payer at a time.',
+         'Enter only the insurance that appears most likely to be primary and note the second one in the comments field.',
+         'Wait until the verification team confirms which insurance is primary before entering either one.']},
+
+  {cat:'Prior Authorization Routing',ans:2,
+   text:'You receive a fax in the inbound worklist that is a Prior Authorization approval response. You are not responsible for logging the authorization details. What is the most important action to take?',
+   opts:['File the fax in the patient\'s record under "Miscellaneous Documents" and mark it as complete.',
+         'Enter the authorization number and expiration date into the patient\'s record before routing it.',
+         'Assign or tag the fax to the correct department or team member responsible for reviewing and logging Prior Authorization approvals, so it is not missed or delayed.',
+         'Set the fax aside in the queue to be handled by whoever reviews it next.']},
+
+  {cat:'Document Attachment & Patient Records',ans:3,
+   text:'You have opened a fax from the Brightree Inbound Worklist and identified the patient it belongs to. Walk through the correct process for attaching the document to the patient\'s file.',
+   opts:['Mark the fax as "Completed" in the worklist to clear it from the queue, then locate the patient separately to upload the file.',
+         'Save the fax as a PDF and email it to the clinical team to attach on their end.',
+         'Open the patient\'s existing record from Patient Search, navigate to their Documents tab, and manually upload the fax from there.',
+         'From the Inbound Worklist, select the document type, use the branch/patient lookup to pull up the correct patient, and attach the document directly — it links automatically to that patient\'s record. If the patient does not yet exist, create the patient record first, then return to attach.']},
+
+  {cat:'Physician NPI Identification',ans:1,
+   text:'You are entering a referral and notice that two physicians with the same last name exist in the Brightree database. What is the most reliable piece of data to confirm you are attaching the correct ordering physician to the patient\'s record?',
+   opts:['The physician\'s office phone number.',
+         'The National Provider Identifier (NPI) number.',
+         'The physician\'s primary specialty.',
+         'The physician\'s office street address.']},
+
+  {cat:'Data Accuracy vs. Speed',ans:2,
+   text:'You are nearing the end of your shift and have 5 new patient profiles still left to enter. How do you handle the remaining work?',
+   opts:['Rush through the entries to finish the list, even if you skip the secondary insurance details.',
+         'Enter the names and phone numbers only, then mark them as "Completed."',
+         'Maintain 100% accuracy on the profiles you do finish, and leave a clear status note for the next shift identifying exactly what remains.',
+         'Set the remaining faxes to "Spam" so the queue looks empty for the manager.']},
+
+  {cat:'Handling Ambiguity',ans:0,
+   text:'You receive a referral where the patient\'s date of birth on the cover sheet is different from the date of birth listed in the clinical notes. What is the best course of action?',
+   opts:['Do not guess. Flag the discrepancy in the patient record notes (e.g., "DOB conflict — cover sheet shows X, clinical notes show Y — needs confirmation") and route for verification before finalizing.',
+         'Use the date of birth from the cover sheet, as it is the most recently completed section of the referral.',
+         'Use the date of birth from the clinical notes, as they are more medically authoritative.',
+         'Enter one date and add a reminder note to double-check it later when you have more time.']},
+
+  {cat:'System Communication (WIP Status)',ans:3,
+   text:'In a high-volume DME environment, why is it important to use specific Work In Progress (WIP) statuses rather than marking everything as "Pending"?',
+   opts:['It prevents the Brightree software from timing out during high-volume periods.',
+         'It is required by Medicare compliance guidelines for all DME providers.',
+         'It helps the IT department generate accurate system usage reports.',
+         'Specific WIP statuses tell the rest of the team exactly where an order or document stands — for example, "Waiting for Docs" vs. "Ready for Delivery" — so nothing falls through the cracks between shifts or team members.']},
+
+  {cat:'Role of Intake in Revenue Cycle',ans:1,
+   text:'How does the work of an Intake Specialist directly impact a DME company\'s financial health?',
+   opts:['It has minimal financial impact — billing and AR teams are responsible for revenue outcomes.',
+         'By ensuring that patient and insurance data entered at the start of the process is accurate and complete, which directly reduces claim denials and speeds up reimbursement.',
+         'By building relationships with physician offices that increase referral volume over time.',
+         'By collecting patient co-pays and outstanding balances at the point of intake.']},
+
+  {cat:'DME Order Sequence',ans:0,
+   text:'In Brightree, what is the general sequence a DME order follows from intake through claim submission?',
+   opts:['Patient Intake → Insurance Verification → Order Entry → Delivery Confirmation → Claim Generation → Submission to Clearinghouse',
+         'Claim Generation → Patient Intake → Insurance Verification → Delivery Confirmation → Order Entry → Submission',
+         'Insurance Verification → Submission to Clearinghouse → Delivery Confirmation → Patient Intake → Order Entry',
+         'Order Entry → Claim Generation → Submission → Insurance Verification → Delivery Confirmation']},
+
+  {cat:'Insurance & Eligibility Basics',ans:3,
+   text:'Before a DME claim can be submitted in Brightree, insurance eligibility must be verified. Which best describes how eligibility verification typically works within the platform?',
+   opts:['Eligibility must always be checked by calling the insurance company directly — Brightree has no electronic verification capability.',
+         'Eligibility is automatically verified when the claim is submitted — no separate check is needed beforehand.',
+         'Eligibility verification is only available for Medicare patients, not commercial payers.',
+         'Brightree can run electronic eligibility checks through integrated payer connections, returning coverage details, copay information, and authorization requirements directly in the patient record.']},
+
+  {cat:'Compliance & Documentation Basics',ans:1,
+   text:'You receive a fax that contains a Certificate of Medical Necessity (CMN) for a patient being set up for a CPAP machine. You are not responsible for qualifying or logging the CMN. What is the most important thing to understand about this document as you route it?',
+   opts:['The CMN is a patient consent form that can be filed in a general documents folder once received.',
+         'The CMN is a required clinical document that must reach the correct team before the claim can be submitted — routing it incorrectly or losing it in the queue will hold up the order.',
+         'The CMN is generated automatically by Brightree after claim submission, so no manual routing is needed.',
+         'The CMN is optional documentation that improves approval odds but is not required to move the order forward.']}
+];
+
+var cur=0,sel=Array(Qs.length).fill(null),tmr,secs=600;
+var cName='',cEmail='',cDate='';
+var startTime=null,qStartTime=0,qTimes={},tabSwitches=0;
+var hintShown=false;
+
+document.addEventListener('visibilitychange',function(){if(document.hidden&&tmr)tabSwitches++;});
+
+function clearErr(i,e){document.getElementById(i).style.borderColor='var(--border)';document.getElementById(e).style.display='none';}
+
+function start(){
+  var n=document.getElementById('cname').value.trim();
+  var e=document.getElementById('cemail').value.trim();
+  var d=document.getElementById('cdate').value;
+  var eOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  var ok=true;
+  if(!n){document.getElementById('cname').style.borderColor='#dc2626';document.getElementById('name-err').style.display='block';ok=false;}
+  if(!e||!eOk){document.getElementById('cemail').style.borderColor='#dc2626';document.getElementById('email-err').style.display='block';ok=false;}
+  if(!d){document.getElementById('cdate').style.borderColor='#dc2626';document.getElementById('date-err').style.display='block';ok=false;}
+  if(!ok)return;
+  cName=n;cEmail=e;
+  // Format date for display
+  var pts=d.split('-');
+  var mo=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  cDate=mo[parseInt(pts[1])-1]+' '+parseInt(pts[2])+', '+pts[0];
+  startTime=new Date();
+  Qs.forEach(function(_,i){qTimes[i]=0;});
+  qStartTime=Date.now();
+  show('s-question');
+  tmr=setInterval(tick,1000);
+  render();
+}
+
+function tick(){
+  secs--;
+  var el=document.getElementById('timer');
+  el.textContent=Math.floor(secs/60)+':'+(secs%60).toString().padStart(2,'0');
+  el.className=secs<=60?'danger':secs<=120?'warn':'';
+  if(qStartTime>0)document.getElementById('qtimer').textContent=Math.round((Date.now()-qStartTime)/1000)+'s on question';
+  if(secs<=0){clearInterval(tmr);finish();}
+}
+
+function render(){
+  var q=Qs[cur];
+  document.getElementById('qcat').textContent=q.cat;
+  document.getElementById('qnum').textContent='Q '+(cur+1)+' / '+Qs.length;
+  document.getElementById('qtext').textContent=q.text;
+  var qE=Math.round(qTimes[cur]||0);
+  document.getElementById('qtimer').textContent=qE>0?qE+'s spent':'0s on question';
+  // Reset hint for each new question
+  hintShown=false;
+  document.getElementById('change-hint').classList.remove('show');
+  var o=document.getElementById('qopts');
+  o.innerHTML='';
+  ['A','B','C','D'].forEach(function(l,i){
+    var b=document.createElement('button');
+    b.className='opt'+(sel[cur]===i?' sel':'');
+    b.innerHTML='<span class="olttr">'+l+'</span>'+q.opts[i];
+    b.onclick=function(){pick(i);};
+    o.appendChild(b);
+  });
+  document.getElementById('btnn').disabled=sel[cur]===null;
+  document.getElementById('prog').style.width=(cur/Qs.length*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pick(i){
+  // Always allow re-selection — just update
+  sel[cur]=i;
+  document.querySelectorAll('.opt').forEach(function(b,idx){b.classList.toggle('sel',idx===i);});
+  document.getElementById('btnn').disabled=false;
+  // Show change hint on first pick per question
+  if(!hintShown){
+    hintShown=true;
+    setTimeout(function(){document.getElementById('change-hint').classList.add('show');},350);
+  }
+}
+
+function recordQTime(){
+  if(qStartTime>0){qTimes[cur]=(qTimes[cur]||0)+(Date.now()-qStartTime)/1000;qStartTime=Date.now();}
+}
+
+function next(){
+  recordQTime();cur++;
+  if(cur>=Qs.length){finish();return;}
+  qStartTime=Date.now();
+  var s=document.getElementById('s-question');
+  s.style.animation='none';void s.offsetWidth;s.style.animation='fadeUp .35s ease';
+  render();
+}
+
+function finish(){
+  clearInterval(tmr);recordQTime();
+  document.getElementById('prog').style.width='100%';
+  var endTime=new Date();
+  var elapsed=Math.floor((endTime-startTime)/1000);
+  var timeTaken=Math.floor(elapsed/60)+' min '+(elapsed%60)+' sec';
+  var correct=Qs.filter(function(q,i){return sel[i]===q.ans;}).length;
+  var pct=correct/Qs.length;
+  var skill,steps;
+  if(pct>=0.85){skill='Strong Intake Foundation';steps=['Advance to live technical interview.','Your detailed results will be reviewed by the hiring manager.','Expect follow-up within 2–3 business days.'];}
+  else if(pct>=0.64){skill='Acceptable — Some Gaps';steps=['A follow-up conversation may be scheduled to explore specific areas.','Review core Brightree fax routing and intake workflows.','Expect follow-up within 3–5 business days.'];}
+  else if(pct>=0.43){skill='Needs Development';steps=['Significant training would be needed on Brightree platform and DME intake fundamentals.','Focus areas: fax routing, document attachment, data accuracy, and payer entry.','You may be considered for a structured training track.'];}
+  else{skill='Do Not Advance';steps=['Brightree intake experience does not meet current requirements.','We recommend hands-on Brightree experience before reapplying.','You are welcome to reapply after gaining additional platform experience.'];}
+  var L=['A','B','C','D'],tFlags=[];
+  Qs.forEach(function(q,i){var t=Math.round(qTimes[i]||0),f='';if(t>90)f=' ⚠ LONG';else if(t>60)f=' △ Elevated';tFlags.push('Q'+(i+1)+': '+t+'s'+f);});
+  var avg=Math.round(Object.values(qTimes).reduce(function(a,b){return a+b;},0)/Qs.length);
+  var spd='Avg '+avg+'s/q';
+  if(tabSwitches>0)spd+=' | '+tabSwitches+' tab switch(es)';
+  var longQs=Object.values(qTimes).filter(function(t){return t>90;}).length;
+  if(longQs>=3)spd+=' | CAUTION: '+longQs+' questions >90s';else if(longQs>=1)spd+=' | NOTE: '+longQs+' q(s) >90s';
+  var summary=Qs.map(function(q,i){var ch=sel[i]!==null?L[sel[i]]:'—';var res=sel[i]===q.ans?'✓ CORRECT':'✗ INCORRECT';return 'Q'+(i+1)+' ['+q.cat+']: Answered '+ch+' | Correct: '+L[q.ans]+' | '+Math.round(qTimes[i]||0)+'s | '+res;}).join('\n');
+  document.getElementById('rname').textContent=cName+' · '+cEmail+' · '+timeTaken+' · '+cDate;
+  show('s-results');
+  fetch(BACKEND_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({candidate_name:cName,candidate_email:cEmail,date_taken:cDate,time_taken:timeTaken+' | '+spd+' | Timing: '+tFlags.join(', '),assessment:'GNS Intake Specialist — Fax Routing & Brightree Skills Assessment',score:correct,total:Qs.length,percentage:Math.round(pct*100)+'%',skill_level:skill,next_steps:steps.join(' | '),question_summary:summary})}).then(function(){console.log('Submitted.');}).catch(function(err){console.error('Error:',err);});
+}
+
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+</script>
+</body>
+</html>
