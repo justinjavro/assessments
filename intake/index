@@ -195,7 +195,7 @@ input[type="date"].finput::-webkit-calendar-picker-indicator{opacity:.45;cursor:
 </div>
 
 <script>
-var BACKEND_URL='YOUR_GNS_INTAKE_APPS_SCRIPT_URL_HERE';
+var BACKEND_URL='https://script.google.com/macros/s/AKfycbz4AE2xNNuDk3TplnK34Bp6uRAImPHIkz9LR-6J9leLiMsld4MgSsEg9l2zpTFoi28/exec';
 
 var Qs=[
   {cat:'HIPAA & Fax Integrity',ans:1,
